@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-type grouptype map[string]bool
+type grouptype map[string]int
 
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
@@ -16,13 +16,23 @@ func main() {
 	i := 0
 	for scanner.Scan() {
 		line := strings.Split(scanner.Text(), "")
-		fmt.Println(line, len(line))
+		fmt.Println(line)
 		if len(line) == 0 {
 			groups = addgroup(groups)
 			i++
+			continue
 		}
 		for _, v := range line {
-			groups[i][v] = true
+			if _, ok := groups[i][v]; ok {
+				groups[i][v] += 1
+			} else {
+				groups[i][v] = 1
+			}
+		}
+		if _, ok := groups[i]["total"]; ok {
+			groups[i]["total"] += 1
+		} else {
+			groups[i]["total"] = 1
 		}
 	}
 	fmt.Println(groups)
@@ -31,8 +41,10 @@ func main() {
 	}
 	total := 0
 	for _, group := range groups {
-		for range group {
-			total++
+		for k, v := range group {
+			if k != "total" && v == group["total"] {
+				total++
+			}
 		}
 	}
 	fmt.Println(total)
