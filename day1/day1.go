@@ -8,23 +8,26 @@ import (
 )
 
 func main() {
-	report := make(map[int]bool)
+	report := make([]int, 0)
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		i, err := strconv.Atoi(scanner.Text())
 		if err != nil {
 			panic(err)
 		}
-		report[i] = true
+		report = append(report, i)
 	}
 	if scerr := scanner.Err(); scerr != nil {
 		panic(scerr)
 	}
 	for i := range report {
-		p := 2020 - i
-		if _, ok := report[p]; ok {
-			fmt.Printf("%d + %d = 2020\n%d * %d = %d\n", i, p, i, p, i*p)
-			return
+		for j := i; j < len(report); j++ {
+			for k := j; k < len(report); k++ {
+				if report[i]+report[j]+report[k] == 2020 {
+					fmt.Printf("%d + %d + %d = 2020\n%d * %d * %d = %d\n", report[i], report[j], report[k], report[i], report[j], report[k], report[i]*report[j]*report[k])
+					return
+				}
+			}
 		}
 	}
 }
