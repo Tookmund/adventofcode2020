@@ -28,13 +28,7 @@ func main() {
 		}
 		c := byte(line[3][0])
 		pass := line[4]
-		numc := 0
-		for i := range pass {
-			if pass[i] == c {
-				numc++
-			}
-		}
-		if numc >= min && numc <= max {
+		if (pass[min-1] == c) != (pass[max-1] == c) {
 			valid++
 		}
 	}
