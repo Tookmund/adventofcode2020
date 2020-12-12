@@ -20,18 +20,48 @@ fn main() -> io::Result<()> {
     }
     println!("{:?}\n{:?}", dir, val);
     let mut loc = [0, 0];
-    let mut facing: i32 = 90;
+    let mut wayloc = [1, 10];
 
+    println!("SHIP: {:?}\nWAYPOINT: {:?}\n", loc, wayloc);
     for i in 0..dir.len() {
         match dir[i] {
-            'F' => shipmove(&mut loc, &facing, &val[i]),
-            'L'  => newfacing(&mut facing, -val[i]),
-            'R'  => newfacing(&mut facing, val[i]),
-            _ => shipmove(&mut loc, &todeg(dir[i]), &val[i]),
+            'F' => movetoway(&mut loc, &wayloc, &val[i]),
+            'L' => rotateway(&mut wayloc, -val[i]),
+            'R' => rotateway(&mut wayloc, val[i]),
+            _ => shipmove(&mut wayloc, &todeg(dir[i]), &val[i]),
         }
+        println!("{}{}\nSHIP: {:?}\nWAYPOINT: {:?}\n", dir[i], val[i], loc, wayloc);
     }
     println!("{:?}\n{}", loc, loc[0].abs()+loc[1].abs());
     Ok(())
+}
+
+fn movetoway(loc: &mut [i32; 2], wayloc: &[i32; 2], val: &i32) {
+    for _ in 0..*val {
+        loc[0] += wayloc[0];
+        loc[1] += wayloc[1];
+    }
+}
+
+fn rotateway(wayloc: &mut [i32; 2], val: i32) {
+    match val {
+        90 | -270 => {
+            let temp = wayloc[0];
+            wayloc[0] = -wayloc[1];
+            wayloc[1] = temp;
+        },
+        180 | -180 => {
+            for _ in 0..2 {
+                rotateway(wayloc, 90);
+            }
+        },
+        270 | -90 => {
+            rotateway(wayloc, 180);
+            rotateway(wayloc, 90);
+        },
+        0 => return,
+        _ => panic!("INVALID ROTATION: {}", val),
+    }
 }
 
 fn shipmove(loc: &mut [i32; 2], facing: &i32, val: &i32) {
@@ -51,15 +81,5 @@ fn todeg(d: char) -> i32 {
         'S' => 180,
         'W' => 270,
         _ => panic!("INVALID DIRECTION: {}", d),
-    }
-}
-
-fn newfacing(facing: &mut i32, val: i32) {
-    *facing = (*facing+val) % 360;
-    *facing = match *facing {
-        -90 => 270,
-        -180 => 180,
-        -270 => 90,
-        _ => *facing
     }
 }
