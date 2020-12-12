@@ -4,7 +4,10 @@ use std::io::prelude::*;
 fn main() -> io::Result<()> {
     let mut joltages: Vec<i32> = Vec::new();
     for line in io::stdin().lock().lines() {
-        joltages.push(line?.parse::<i32>().unwrap());
+        match line?.parse::<i32>() {
+            Ok(i) => joltages.push(i),
+            Err(e) => println!("WARNING: {}\n", e),
+        }
     }
     // The outlet is 0 jolts
     joltages.push(0);
@@ -12,19 +15,21 @@ fn main() -> io::Result<()> {
     // The computer is 3+largest
     joltages.push(joltages.last().unwrap()+3);
     println!("{:?}", joltages);
-    let mut prev: i32 = -1;
-    let mut ones: i32 = 0;
-    let mut threes: i32 = 0;
-    for j in joltages.iter() {
-        if prev >= 0 {
-            match j-prev {
-                1 => ones += 1,
-                3 => threes += 1,
-                _ => panic!("INVALID"),
+
+    let mut ways: Vec<i64> = vec![0; joltages.len()];
+    ways[0] = 1;
+
+    for i in 0..joltages.len() {
+        for j in i+1..i+4 {
+            if j >= joltages.len() {
+                break;
+            } else if joltages[j]-joltages[i] <= 3 {
+                ways[j] += ways[i];
+            } else {
+                break;
             }
         }
-        prev = *j;
     }
-    println!("Ones: {}\nThrees: {}\nMultiplied:{}\n", ones, threes, ones*threes);
+    println!("{}", ways[joltages.len()-1]);
     return Ok(())
 }
