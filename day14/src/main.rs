@@ -51,8 +51,7 @@ fn getresultnum(mask: &str, newnum: &str) -> String {
     let mut ret: String = "".to_owned();
     let maskb = mask.as_bytes();
     for i in 0..maskb.len() {
-        // X == 88
-        if maskb[i] == 88 {
+        if maskb[i] == b'X' {
             ret.push_str(&newnum[i..i+1]);
         } else {
             ret.push_str(&mask[i..i+1]);
