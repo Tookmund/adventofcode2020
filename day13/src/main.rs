@@ -5,35 +5,44 @@ fn main() {
     let stdin = io::stdin();
     let mut lines = stdin.lock().lines();
     let first = get_string(lines.next());
-    let earliest = match first.parse::<i32>() {
+    let _earliest = match first.parse::<usize>() {
         Ok(v) => v,
         Err(e) => panic!("First line invalid: {}", e),
     };
     let second = get_string(lines.next());
     let buses = second.split(",");
+    let mut sched: Vec<Option<usize>> = Vec::new();
 
-    let mut minbus = [-1; 2];
+    let mut largest: usize = 0;
     for b in buses {
         if b == "x" {
-            continue;
-        }
-        let bn = match b.parse::<i32>() {
-            Ok(v) => v,
-            Err(e) => panic!("Parsing ({}): {}", b, e),
-        };
-        for i in earliest..i32::MAX {
-            if i % bn == 0 {
-                if minbus[0] == -1 || i < minbus[0] {
-                    minbus[0] = i;
-                    minbus[1] = bn;
-                }
-                break;
+            sched.push(None);
+        } else {
+            match b.parse::<usize>() {
+                Ok(v) => {
+                    sched.push(Some(v));
+                    if largest < v {
+                        largest = v;
+                    }
+                },
+                Err(e) => panic!("Parsing ({}): {}", b, e),
             }
         }
     }
-    let waiting = minbus[0]-earliest;
-    println!("ID: {} Waiting: {}\nMultiplied: {}", minbus[1], waiting,
-             minbus[1]*waiting);
+    let mut timestamp = 0;
+    let mut inc = sched[0].unwrap();
+    for j in 1..sched.len() {
+        match sched[j] {
+            None => continue,
+            Some(v) => {
+                while (timestamp + j) % v != 0 {
+                    timestamp += inc;
+                }
+                inc *= v;
+            }
+        }
+    }
+    println!("Found: {}", timestamp);
 }
 
 fn get_string(or: Option<Result<String, io::Error>>) -> String {
