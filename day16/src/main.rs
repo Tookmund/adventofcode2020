@@ -84,7 +84,7 @@ fn main() -> io::Result<()> {
     for line in io::stdin().lock().lines() {
         let line = line?;
         println!("{}", line);
-        if line == "" {
+        if line.is_empty() {
             continue;
         }
         match state_change(&state, &line) {
