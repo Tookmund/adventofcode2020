@@ -38,6 +38,14 @@ impl Rule {
         }
         s
     }
+    fn contains(&self, v: FieldVal) -> bool {
+        for range in &self.rule {
+            if range.contains(&v) {
+                return true;
+            }
+        }
+        false
+    }
 }
 
 impl Ticket {
@@ -51,15 +59,24 @@ impl Ticket {
         self.fields.push(f);
     }
 
-    fn validate(&self, rules: Vec<Rule>) -> bool {
-        true
+    fn validate(&self, rules: &[Rule]) -> FieldVal {
+        let mut err: FieldVal = 0;
+        for f in &self.fields {
+            for rule in rules {
+                if rule.contains(*f) {
+                    continue;
+                }
+            }
+            err += f;
+        }
+        err
     }
 }
 
 fn main() -> io::Result<()> {
     let mut state = PState::Fields;
     let mut rules = Vec::<Rule>::new();
-    let mut your: Ticket;
+    let mut your = Ticket::new();
     let mut nearby = Vec::<Ticket>::new();
     for line in io::stdin().lock().lines() {
         let line = line?;
@@ -76,6 +93,11 @@ fn main() -> io::Result<()> {
             },
         };
     }
+    let mut err = your.validate(&rules);
+    for t in nearby {
+        err += t.validate(&rules)
+    }
+    println!("{}", err);
     Ok(())
 }
 
