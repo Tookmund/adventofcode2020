@@ -4,9 +4,9 @@ use std::ops::Range;
 
 #[derive(PartialEq,Debug)]
 enum PState {
-    FIELDS,
-    YOURS,
-    NEARBY,
+    Fields,
+    Yours,
+    Nearby,
 }
 
 type FieldVal = i32;
@@ -33,7 +33,7 @@ impl Rules {
         }
     }
 
-    fn addrule(&mut self, n: &str, r: &[FieldVal]) {
+    fn add_rule(&mut self, n: &str, r: &[FieldVal]) {
         self.names.push(n.to_string());
         let mut rv = FieldRule::new();
         for range in r.chunks(2) {
@@ -50,7 +50,7 @@ impl Ticket {
         }
     }
 
-    fn addfield(&mut self, f: FieldVal) {
+    fn add_field(&mut self, f: FieldVal) {
         self.fields.push(f);
     }
 
@@ -61,7 +61,7 @@ impl Ticket {
 }
 
 fn main() -> io::Result<()> {
-    let mut state = PState::FIELDS;
+    let mut state = PState::Fields;
     let mut rules = Rules::new();
     let mut your: Ticket;
     let mut nearby = Vec::<Ticket>::new();
@@ -71,27 +71,27 @@ fn main() -> io::Result<()> {
         if line == "" {
             continue;
         }
-        match stateChange(&state, &line) {
+        match state_change(&state, &line) {
             Some(v) => state = v,
             None => match state {
-                PState::FIELDS => parserules(&line, &mut rules),
-                PState::YOURS => your = parseticket(&line),
-                PState::NEARBY => nearby.push(parseticket(&line)),
+                PState::Fields => parse_rules(&line, &mut rules),
+                PState::Yours => your = parse_ticket(&line),
+                PState::Nearby => nearby.push(parse_ticket(&line)),
             },
         };
     }
     Ok(())
 }
 
-fn stateChange(state: &PState, line: &str) -> Option<PState> {
+fn state_change(state: &PState, line: &str) -> Option<PState> {
     match line {
-        "your ticket:" if *state == PState::FIELDS => Some(PState::YOURS),
-        "nearby tickets:" if *state == PState::YOURS => Some(PState::NEARBY),
+        "your ticket:" if *state == PState::Fields => Some(PState::Yours),
+        "nearby tickets:" if *state == PState::Yours => Some(PState::Nearby),
         _ => None,
     }
 }
 
-fn parserules(line: &str, rules: &mut Rules) {
+fn parse_rules(line: &str, rules: &mut Rules) {
     let lvec: Vec<&str> = line.split(": ").collect();
     let name = lvec[0];
     let mut rvec = Vec::<FieldVal>::new();
@@ -100,13 +100,13 @@ fn parserules(line: &str, rules: &mut Rules) {
             rvec.push(b.parse().unwrap());
         }
     }
-    rules.addrule(name, &rvec);
+    rules.add_rule(name, &rvec);
 }
 
-fn parseticket(line: &str) -> Ticket {
+fn parse_ticket(line: &str) -> Ticket {
     let mut ticket = Ticket::new();
     for v in line.split(",") {
-        ticket.addfield(v.parse().unwrap());
+        ticket.add_field(v.parse().unwrap());
     }
     return ticket;
 }
