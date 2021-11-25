@@ -20,26 +20,23 @@ type FieldRange = Range<FieldVal>;
 type FieldRule = Vec<FieldRange>;
 
 #[derive(PartialEq,Debug)]
-struct Rules {
-    rules: Vec<FieldRule>,
-    names: Vec<String>,
+struct Rule {
+    name: String,
+    rule: FieldRule,
 }
 
-impl Rules {
-    fn new() -> Self {
-        Rules {
-            rules: Vec::<FieldRule>::new(),
-            names: Vec::<String>::new(),
-        }
-    }
-
-    fn add_rule(&mut self, n: &str, r: &[FieldVal]) {
-        self.names.push(n.to_string());
-        let mut rv = FieldRule::new();
+impl Rule {
+    fn new(n: &str, r: &[FieldVal]) -> Self {
+        let mut s = Rule {
+            rule: FieldRule::new(),
+            name: String::new(),
+        };
+        s.name = n.to_string();
+        s.rule = FieldRule::new();
         for range in r.chunks(2) {
-            rv.push(range[0]..range[1]);
+            s.rule.push(range[0]..range[1]);
         }
-        self.rules.push(rv);
+        s
     }
 }
 
@@ -54,15 +51,14 @@ impl Ticket {
         self.fields.push(f);
     }
 
-    fn validate(&self, rules: Rules) -> bool {
-        // TODO
+    fn validate(&self, rules: Vec<Rule>) -> bool {
         true
     }
 }
 
 fn main() -> io::Result<()> {
     let mut state = PState::Fields;
-    let mut rules = Rules::new();
+    let mut rules = Vec::<Rule>::new();
     let mut your: Ticket;
     let mut nearby = Vec::<Ticket>::new();
     for line in io::stdin().lock().lines() {
@@ -74,7 +70,7 @@ fn main() -> io::Result<()> {
         match state_change(&state, &line) {
             Some(v) => state = v,
             None => match state {
-                PState::Fields => parse_rules(&line, &mut rules),
+                PState::Fields => rules.push(parse_rule(&line)),
                 PState::Yours => your = parse_ticket(&line),
                 PState::Nearby => nearby.push(parse_ticket(&line)),
             },
@@ -91,7 +87,7 @@ fn state_change(state: &PState, line: &str) -> Option<PState> {
     }
 }
 
-fn parse_rules(line: &str, rules: &mut Rules) {
+fn parse_rule(line: &str) -> Rule {
     let lvec: Vec<&str> = line.split(": ").collect();
     let name = lvec[0];
     let mut rvec = Vec::<FieldVal>::new();
@@ -100,7 +96,7 @@ fn parse_rules(line: &str, rules: &mut Rules) {
             rvec.push(b.parse().unwrap());
         }
     }
-    rules.add_rule(name, &rvec);
+    Rule::new(name, &rvec)
 }
 
 fn parse_ticket(line: &str) -> Ticket {
