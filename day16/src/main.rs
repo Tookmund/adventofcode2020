@@ -121,7 +121,9 @@ fn parse_rule(line: &str) -> Rule {
             rvec.push(b.parse().unwrap());
         }
     }
-    Rule::new(name, &rvec)
+    let r = Rule::new(name, &rvec);
+    println!("{:?}", r);
+    r
 }
 
 fn parse_ticket(line: &str) -> Ticket {
@@ -129,5 +131,6 @@ fn parse_ticket(line: &str) -> Ticket {
     for v in line.split(",") {
         ticket.add_field(v.parse().unwrap());
     }
-    return ticket;
+    println!("{:?}", ticket);
+    ticket
 }
