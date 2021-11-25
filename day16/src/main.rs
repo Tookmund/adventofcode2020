@@ -34,7 +34,7 @@ impl Rule {
         s.name = n.to_string();
         s.rule = FieldRule::new();
         for range in r.chunks(2) {
-            s.rule.push(range[0]..range[1]);
+            s.rule.push(range[0]..range[1]+1);
         }
         s
     }
