@@ -62,12 +62,15 @@ impl Ticket {
     fn validate(&self, rules: &[Rule]) -> FieldVal {
         let mut err: FieldVal = 0;
         for f in &self.fields {
+            let mut contain = false;
             for rule in rules {
                 if rule.contains(*f) {
-                    continue;
+                    contain = true;
                 }
             }
-            err += f;
+            if !contain {
+                err += f;
+            }
         }
         err
     }
