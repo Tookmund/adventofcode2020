@@ -92,11 +92,11 @@ fn stateChange(state: &PState, line: &str) -> Option<PState> {
 }
 
 fn parserules(line: &str, rules: &mut Rules) {
-    let lvec: Vec<&str> = line.split(":").collect();
+    let lvec: Vec<&str> = line.split(": ").collect();
     let name = lvec[0];
     let mut rvec = Vec::<FieldVal>::new();
     for r in lvec[1].split(" or ") {
-        for b in r.split("-") {
+        for b in r.split('-') {
             rvec.push(b.parse().unwrap());
         }
     }
