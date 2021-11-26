@@ -9,7 +9,7 @@ enum PState {
     Nearby,
 }
 
-type FieldVal = i32;
+type FieldVal = u64;
 
 #[derive(PartialEq,Debug)]
 struct Ticket {
@@ -135,9 +135,14 @@ fn main() -> io::Result<()> {
         }
         ordered_rules.push(rules.remove(set_rule));
     }
+    let mut departure = 1;
     for i in 0..your.len() {
-        println!("{}: {}", ordered_rules[i].name, your.get_field(i))
+        println!("{}: {}", ordered_rules[i].name, your.get_field(i));
+        if ordered_rules[i].name.contains("departure") {
+            departure *= your.get_field(i);
+        }
     }
+    println!("Departure: {}", departure);
     Ok(())
 }
 
