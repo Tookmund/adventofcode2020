@@ -59,6 +59,14 @@ impl Ticket {
         self.fields.push(f);
     }
 
+    fn get_field(&self, i: usize) -> FieldVal {
+        self.fields[i]
+    }
+
+    fn len(&self) -> usize {
+        self.fields.len()
+    }
+
     fn validate(&self, rules: &[Rule]) -> FieldVal {
         let mut err: FieldVal = 0;
         for f in &self.fields {
@@ -97,10 +105,39 @@ fn main() -> io::Result<()> {
         };
     }
     let mut err = your.validate(&rules);
-    for t in nearby {
+    for t in &nearby {
         err += t.validate(&rules)
     }
     println!("{}", err);
+
+    // Filter out invalid tickets
+    nearby = nearby.drain(..).filter(|t| t.validate(&rules) == 0).collect();
+
+    let mut ordered_rules = Vec::<Rule>::with_capacity(your.len());
+    for ti in 0..your.len() {
+        let mut set_rule = 0;
+        for ri in 0..rules.len() {
+            let mut valid = true;
+            for t in &nearby {
+                if !rules[ri].contains(t.get_field(ti)) {
+                    valid = false;
+                }
+            }
+            if valid {
+                if ordered_rules.len() == ti {
+                    set_rule = ri;
+                } else {
+                    panic!("{:?} and {:?} are both valid for index {}",
+                           rules[ri], ordered_rules[ti], ti);
+                }
+                break;
+            }
+        }
+        ordered_rules.push(rules.remove(set_rule));
+    }
+    for i in 0..your.len() {
+        println!("{}: {}", ordered_rules[i].name, your.get_field(i))
+    }
     Ok(())
 }
 
