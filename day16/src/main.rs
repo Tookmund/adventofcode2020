@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use std::io;
 use std::io::prelude::*;
 use std::ops::Range;
@@ -19,7 +20,7 @@ struct Ticket {
 type FieldRange = Range<FieldVal>;
 type FieldRule = Vec<FieldRange>;
 
-#[derive(PartialEq,Debug)]
+#[derive(PartialEq,Debug,Eq,Hash)]
 struct Rule {
     name: String,
     rule: FieldRule,
@@ -112,33 +113,29 @@ fn main() -> io::Result<()> {
     // Filter out invalid tickets
     nearby = nearby.drain(..).filter(|t| t.validate(&rules) == 0).collect();
 
-    let mut ordered_rules = Vec::<Rule>::with_capacity(your.len());
-    for ti in 0..your.len() {
-        let mut set_rule: Option<usize> = None;
-        for (ri, r) in rules.iter().enumerate() {
-            let mut valid = true;
+    for p in rules.iter().permutations(rules.len()).unique() {
+        let mut valid = true;
+        for i in 0..your.len() {
             for t in &nearby {
-                if !r.contains(t.get_field(ti)) {
+                if !p[i].contains(t.get_field(i)) {
                     valid = false;
+                    break;
                 }
             }
-            if valid {
-                set_rule = Some(ri);
+        }
+        if valid {
+            let mut departure = 1;
+            for (i, r) in p.iter().enumerate() {
+                let f = your.get_field(i);
+                println!("{}: {}", r.name, f);
+                if r.name.contains("departure") {
+                    departure *= f;
+                }
             }
-        }
-        match set_rule {
-            None => panic!("No Matching Rule Found For Index {}", ti),
-            Some(v) => ordered_rules.push(rules.remove(v)),
-        };
-    }
-    let mut departure = 1;
-    for (i, or) in ordered_rules.iter().enumerate() {
-        println!("{}: {}", or.name, your.get_field(i));
-        if or.name.contains("departure") {
-            departure *= your.get_field(i);
+            println!("Departure: {}", departure);
+            break;
         }
     }
-    println!("Departure: {}", departure);
     Ok(())
 }
 
