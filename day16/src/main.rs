@@ -107,7 +107,7 @@ fn main() -> io::Result<()> {
     for t in &nearby {
         err += t.validate(&rules)
     }
-    println!("{}", err);
+    println!("\nTicket Scanning Error Rate: {}\n", err);
 
     // Filter out invalid tickets
     nearby = nearby.drain(..).filter(|t| t.validate(&rules) == 0).collect();
