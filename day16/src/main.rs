@@ -91,7 +91,6 @@ fn main() -> io::Result<()> {
     let mut nearby = Vec::<Ticket>::new();
     for line in io::stdin().lock().lines() {
         let line = line?;
-        println!("{}", line);
         if line.is_empty() {
             continue;
         }
@@ -164,7 +163,6 @@ fn parse_rule(line: &str) -> Rule {
         }
     }
     let r = Rule::new(name, &rvec);
-    println!("{:?}", r);
     r
 }
 
@@ -173,6 +171,5 @@ fn parse_ticket(line: &str) -> Ticket {
     for v in line.split(',') {
         ticket.add_field(v.parse().unwrap());
     }
-    println!("{:?}", ticket);
     ticket
 }
