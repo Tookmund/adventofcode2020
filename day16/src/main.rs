@@ -114,7 +114,7 @@ fn main() -> io::Result<()> {
 
     let mut ordered_rules = Vec::<Rule>::with_capacity(your.len());
     for ti in 0..your.len() {
-        let mut set_rule = 0;
+        let mut set_rule: Option<usize> = None;
         for (ri, r) in rules.iter().enumerate() {
             let mut valid = true;
             for t in &nearby {
@@ -123,16 +123,13 @@ fn main() -> io::Result<()> {
                 }
             }
             if valid {
-                if ordered_rules.len() == ti {
-                    set_rule = ri;
-                } else {
-                    panic!("{:?} and {:?} are both valid for index {}",
-                           r, ordered_rules[ti], ti);
-                }
-                break;
+                set_rule = Some(ri);
             }
         }
-        ordered_rules.push(rules.remove(set_rule));
+        match set_rule {
+            None => panic!("No Matching Rule Found For Index {}", ti),
+            Some(v) => ordered_rules.push(rules.remove(v)),
+        };
     }
     let mut departure = 1;
     for (i, or) in ordered_rules.iter().enumerate() {
