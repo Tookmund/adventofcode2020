@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use std::io;
 use std::io::prelude::*;
 use std::ops::Range;
@@ -113,32 +112,63 @@ fn main() -> io::Result<()> {
     // Filter out invalid tickets
     nearby = nearby.drain(..).filter(|t| t.validate(&rules) == 0).collect();
 
-    for p in rules.iter().permutations(rules.len()).unique() {
-        let mut valid = true;
-        for i in 0..your.len() {
+    let mut possible = Vec::<Vec<usize>>::with_capacity(your.len());
+    for _ in 0..possible.capacity() {
+        possible.push(Vec::<usize>::new());
+    }
+    for ti in 0..your.len() {
+        for (ri, r) in rules.iter().enumerate() {
+            let mut valid = true;
             for t in &nearby {
-                if !p[i].contains(t.get_field(i)) {
+                if !r.contains(t.get_field(ti)) {
                     valid = false;
                     break;
                 }
             }
-            if !valid {
-                break;
+            if valid {
+                possible[ti].push(ri);
             }
         }
-        if valid {
-            let mut departure = 1;
-            for (i, r) in p.iter().enumerate() {
-                let f = your.get_field(i);
-                println!("{}: {}", r.name, f);
-                if r.name.contains("departure") {
-                    departure *= f;
+    }
+    let mut ordered_rules: Vec<Option<&Rule>> = Vec::with_capacity(rules.len());
+    for _ in 0..ordered_rules.capacity() {
+        ordered_rules.push(None);
+    }
+    loop {
+        let mut to_remove = Vec::<usize>::new();
+        for ti in 0..possible.len() {
+            let p = &possible[ti];
+            if p.len() == 1 {
+                ordered_rules[ti] = Some(&rules[p[0]]);
+                to_remove.push(p[0]);
+            }
+        }
+        for r in &to_remove {
+            for p in &mut possible {
+                match p.iter().position(|&v| v == *r) {
+                    Some(v) => {
+                        p.remove(v);
+                        ()
+                    },
+                    None => (),
                 }
             }
-            println!("Departure: {}", departure);
+        }
+        if to_remove.is_empty() {
             break;
         }
     }
+    let mut departure = 1;
+    for (i, or) in ordered_rules.iter().enumerate() {
+        let r = or.unwrap();
+        let f = your.get_field(i);
+        println!("{}: {}", r.name, f);
+        if r.name.contains("departure") {
+            departure *= f;
+        }
+    }
+    println!("Departure: {}", departure);
+
     Ok(())
 }
 
