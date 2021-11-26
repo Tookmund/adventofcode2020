@@ -116,10 +116,10 @@ fn main() -> io::Result<()> {
     let mut ordered_rules = Vec::<Rule>::with_capacity(your.len());
     for ti in 0..your.len() {
         let mut set_rule = 0;
-        for ri in 0..rules.len() {
+        for (ri, r) in rules.iter().enumerate() {
             let mut valid = true;
             for t in &nearby {
-                if !rules[ri].contains(t.get_field(ti)) {
+                if !r.contains(t.get_field(ti)) {
                     valid = false;
                 }
             }
@@ -128,7 +128,7 @@ fn main() -> io::Result<()> {
                     set_rule = ri;
                 } else {
                     panic!("{:?} and {:?} are both valid for index {}",
-                           rules[ri], ordered_rules[ti], ti);
+                           r, ordered_rules[ti], ti);
                 }
                 break;
             }
@@ -136,9 +136,9 @@ fn main() -> io::Result<()> {
         ordered_rules.push(rules.remove(set_rule));
     }
     let mut departure = 1;
-    for i in 0..your.len() {
-        println!("{}: {}", ordered_rules[i].name, your.get_field(i));
-        if ordered_rules[i].name.contains("departure") {
+    for (i, or) in ordered_rules.iter().enumerate() {
+        println!("{}: {}", or.name, your.get_field(i));
+        if or.name.contains("departure") {
             departure *= your.get_field(i);
         }
     }
@@ -170,7 +170,7 @@ fn parse_rule(line: &str) -> Rule {
 
 fn parse_ticket(line: &str) -> Ticket {
     let mut ticket = Ticket::new();
-    for v in line.split(",") {
+    for v in line.split(',') {
         ticket.add_field(v.parse().unwrap());
     }
     println!("{:?}", ticket);
