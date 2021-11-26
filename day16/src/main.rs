@@ -122,6 +122,9 @@ fn main() -> io::Result<()> {
                     break;
                 }
             }
+            if !valid {
+                break;
+            }
         }
         if valid {
             let mut departure = 1;
